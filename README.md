@@ -14,3 +14,8 @@ property so that the access to the h2-console is easier and you don't have to ad
 Chapter 4 Spring Security: This chapter added Spring security. Some improvements I made in this chapter, were improving the UI. Making sure that the h2-console is accessible without need to authenticate, added more pages (error page, order complete) page, making the order form autofill the user data,
 fixed the StandardPasswordEncoder deprecation and last but not least added default user to the data.sql. You can now login with Woody/bullseye and Buzz/infinity into the Taco Cloud app. Unfortunately I had to disable csrf protection to
 make it work. With it enabled the order page threw a 403 even with the hidden input included. This could be improved.
+
+Chapter 4 Update: Added a few more unit tests to test the different controllers. There could be more, but as this is just an app to learn about Spring, this is enough. Note: I couldn't figure out how to use the AuthenticationPrincipal
+in tests. No StackOverflow answer helped in my case.
+
+Chapter 5 Spring Rest: Coming soon

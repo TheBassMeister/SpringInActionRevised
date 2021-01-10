@@ -32,11 +32,13 @@ public class OrderController {
 
     @GetMapping("/current")
     public String orderForm(Model model, Order order, @AuthenticationPrincipal User user) {
-        order.setCustomerName(user.getFullname());
-        order.setStreet(user.getStreet());
-        order.setCity(user.getCity());
-        order.setState(user.getState());
-        order.setZip(user.getZip());
+        if(user!=null) {
+            order.setCustomerName(user.getFullname());
+            order.setStreet(user.getStreet());
+            order.setCity(user.getCity());
+            order.setState(user.getState());
+            order.setZip(user.getZip());
+        }
         return "orderForm";
     }
 
