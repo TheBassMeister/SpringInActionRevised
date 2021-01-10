@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Taco Cloud</title>
+</head>
+<body>
+<h1>Login</h1>
+<img th:src="@{/images/TacoCloud.png}"/>
+<div th:if="${error}" th:text="'Oops something went wrong. Reason:'+ ${error}">
+    Oops, something went wrong!
+</div>
+<div>
+    Click <a th:href="@{/}">here</a> to get back to the TacoCloud homepage
+</div>
+</body>
+</html>
