@@ -21,4 +21,6 @@ make it work. With it enabled the order page threw a 403 even with the hidden in
 Chapter 4 Update: Added a few more unit tests to test the different controllers. There could be more, but as this is just an app to learn about Spring, this is enough. Note: I couldn't figure out how to use the AuthenticationPrincipal
 in tests. No StackOverflow answer helped in my case.
 
+Chapter 4 Update 2: Finally solved the AuthenticationPrincipal issue by configuring the MockMvcs with springSecurity() and using the withUser(UserDetails) method. Tests are now improved.
+
 Chapter 5 Spring Rest: Coming soon

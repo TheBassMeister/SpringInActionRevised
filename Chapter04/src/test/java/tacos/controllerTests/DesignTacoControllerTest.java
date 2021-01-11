@@ -8,9 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 import tacos.Ingredient;
 import tacos.Taco;
 import tacos.User;
@@ -20,11 +25,14 @@ import tacos.data.UserRepository;
 import tacos.web.DesignTacoController;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,6 +45,9 @@ import static tacos.Ingredient.Type;
 public class DesignTacoControllerTest {
 
     @Autowired
+    private WebApplicationContext context;
+
+    private UserDetailsService userDetailsService;
     private MockMvc mockMvc;
 
     @MockBean
@@ -52,6 +63,7 @@ public class DesignTacoControllerTest {
 
     @Before
     public void setup() {
+        mockMvc= MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
 
         ingredients = Arrays.asList(
                 new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
@@ -86,25 +98,25 @@ public class DesignTacoControllerTest {
         userRepository.save(testUser);
 
         when(userRepository.findByUsername("testuser")).thenReturn(testUser);
+        userDetailsService= new InMemoryUserDetailsManager(Collections.singletonList(testUser));
     }
 
     @Test
-    @WithMockUser
     public void testShowDesignForm() throws Exception {
-        mockMvc.perform(get("/design"))
+        mockMvc.perform(get("/design").with(user(testUser)))
                 .andExpect(status().isOk())
                 .andExpect(view().name("design"))
                 .andExpect(model().attribute("wrap", ingredients.subList(0, 2)))
                 .andExpect(model().attribute("protein", ingredients.subList(2, 4)))
                 .andExpect(model().attribute("veggies", ingredients.subList(4, 6)))
                 .andExpect(model().attribute("cheese", ingredients.subList(6, 8)))
-                .andExpect(model().attribute("sauce", ingredients.subList(8, 10)));
+                .andExpect(model().attribute("sauce", ingredients.subList(8, 10)))
+                .andExpect(content().string(containsString("<h2>Feelin' hungry, <span>Test User</span>?</h2>")));
     }
 
     @Test
-    @WithMockUser
     public void processDesign() throws Exception {
-        mockMvc.perform(post("/design")
+        mockMvc.perform(post("/design").with(user(testUser))
                 .content("name=Test+Taco&ingredients=FLTO,GRBF,CHED")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().is3xxRedirection())
@@ -112,27 +124,24 @@ public class DesignTacoControllerTest {
     }
 
     @Test
-    @WithMockUser
     public void noIngredientSelected() throws Exception {
-        mockMvc.perform(post("/design")
+        mockMvc.perform(post("/design").with(user(testUser))
                 .content("name=Test+Taco")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(content().string(containsString("Please select at least one ingredient")));
     }
 
     @Test
-    @WithMockUser
     public void noNameGiven() throws Exception {
-        mockMvc.perform(post("/design")
+        mockMvc.perform(post("/design").with(user(testUser))
                 .content("ingredients=FLTO,GRBF,CHED")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(content().string(containsString("must not be null")));
     }
 
     @Test
-    @WithMockUser
     public void nameTooShort() throws Exception {
-        mockMvc.perform(post("/design")
+        mockMvc.perform(post("/design").with(user(testUser))
                 .content("name=Tes&ingredients=FLTO,GRBF,CHED")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(content().string(containsString("Name must be at least 5 characters long")));
@@ -146,9 +155,8 @@ public class DesignTacoControllerTest {
     }
 
     @Test
-    @WithMockUser
     public void logout() throws Exception{
-        mockMvc.perform(post("/logout"))
+        mockMvc.perform(post("/logout").with(user(testUser)))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues("Location", "/"));
 
