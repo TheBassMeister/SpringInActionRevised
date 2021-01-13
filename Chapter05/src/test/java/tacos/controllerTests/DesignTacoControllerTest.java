@@ -116,11 +116,19 @@ public class DesignTacoControllerTest {
 
     @Test
     public void processDesign() throws Exception {
-        mockMvc.perform(post("/design").with(user(testUser))
+        mockMvc.perform(post("/design").param("action","orderTaco").with(user(testUser))
                 .content("name=Test+Taco&ingredients=FLTO,GRBF,CHED")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().stringValues("Location", "/orders/current"));
+    }
+
+    @Test
+    public void addNewTaco() throws Exception {
+        mockMvc.perform(post("/design").param("action","orderTaco").with(user(testUser))
+                .content("name=Test+Taco&ingredients=FLTO,GRBF,CHED")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk());
     }
 
     @Test

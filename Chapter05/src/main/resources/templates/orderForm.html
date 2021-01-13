@@ -8,6 +8,7 @@
 <body>
 <div class="menuHeader">
     <a class="newDesign" th:href="@{/design}" id="another">Design another taco</a><br/>
+    <a class="newDesign" th:href="@{/orders/lastOrders}" >Check your order History</a><br/>
     <form method="POST" th:action="@{/logout}" class="logoutForm">
         <input type="submit" value="Logout"/>
     </form>

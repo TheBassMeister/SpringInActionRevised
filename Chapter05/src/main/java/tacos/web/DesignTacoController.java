@@ -29,6 +29,7 @@ public class DesignTacoController {
     private IngredientRepository ingredientRepository;
     private TacoRepository tacoRepository;
     private User currentUser;
+    private boolean noTacos=true;
 
     @Autowired
     public DesignTacoController(IngredientRepository ingredientRepository, TacoRepository tacoRepository){
@@ -66,17 +67,24 @@ public class DesignTacoController {
         model.addAttribute("design", new Taco());
         currentUser=user;
         model.addAttribute("user", user());
+        model.addAttribute("noTacos", true);
         return "design";
     }
 
-    @PostMapping
-    public String processDesign(@ModelAttribute("design") @Valid Taco design, Errors errors, @ModelAttribute Order order) {
+    @PostMapping(params="action=addTaco")
+    public String addToOrder(Model model, @ModelAttribute("design") @Valid Taco design, Errors errors, @ModelAttribute Order order) {
         if(errors.hasErrors()){
             return "design";
         }
         log.info("Processing design: " + design);
         Taco savedTaco=tacoRepository.save(design);
         order.addDesign(savedTaco);
+        model.addAttribute("noTacos", false);
+        return "design";
+    }
+
+    @PostMapping(params="action=orderTaco")
+    public String submitOrder(@ModelAttribute Order order,  @RequestParam(value="action", required=true) String action) {
         return "redirect:/orders/current";
     }
 

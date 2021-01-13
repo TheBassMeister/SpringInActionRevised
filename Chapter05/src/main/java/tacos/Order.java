@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.CreditCardNumber;
 import javax.persistence.*;
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +17,7 @@ import java.util.List;
 @Table(name="Taco_Order")
 public class Order {
 
-    @Id
+    @Id @GeneratedValue(strategy= GenerationType.AUTO)
     private long id;
     private Date placedAt;
     @ManyToMany(targetEntity=Taco.class)

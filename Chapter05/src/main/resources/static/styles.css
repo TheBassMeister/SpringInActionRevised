@@ -55,8 +55,10 @@ form:not(.validationError) span{
 .menuHeader{
     display:flex;
     float:right;
-    justify-content:space-between;
-    width:350px;
+}
+
+.menuHeader a{
+    margin-right: 10px;
 }
 
 .logoutForm{
@@ -65,4 +67,27 @@ form:not(.validationError) span{
 
 .orderError{
     width:350px;
+}
+
+
+.ordersTable{
+    margin: 20px 0px;
+}
+
+.ordersTable, th, td {
+    border: 1px solid gray;
+    border-collapse: collapse;
+
+}
+
+.ordersTable th,td{
+    padding: 0px 10px;
+}
+
+.ordersTable th{
+    background: lightgray;
+}
+
+.ordersTable caption{
+    text-align:left;
 }

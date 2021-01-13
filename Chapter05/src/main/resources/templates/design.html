@@ -78,8 +78,11 @@
               th:errors="*{name}">Name Error</span>
         <br/>
 
-        <button>Submit your taco</button>
+        <button name="action" value="addTaco">Add Taco to Order</button>
+        <button name="action" value="orderTaco" th:disabled="${noTacos}">Proceed to finish order</button>
     </div>
 </form>
+<div th:text="'There are '+${order.tacos.size}+' tacos in this order'">NumberOfTacosCreated</div>
+
 </body>
 </html>

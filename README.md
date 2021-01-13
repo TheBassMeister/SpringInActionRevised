@@ -23,4 +23,7 @@ in tests. No StackOverflow answer helped in my case.
 
 Chapter 4 Update 2: Finally solved the AuthenticationPrincipal issue by configuring the MockMvcs with springSecurity() and using the withUser(UserDetails) method. Tests are now improved.
 
-Chapter 5 Spring Rest: Coming soon
+Chapter 5 Spring properties: Added a new page to see the last orders, that use the new property taco.orders.pageSize property. Added test for that. Also added new functionality to actually add multiple tacos to same order. UX Design
+can be improved, but this is not an app about learning fronted, but about Spring.
+
+Chapter 6: Spring Rest coming soon

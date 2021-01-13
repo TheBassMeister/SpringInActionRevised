@@ -4,12 +4,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,12 +21,16 @@ import tacos.Taco;
 import tacos.User;
 import tacos.data.IngredientRepository;
 import tacos.data.OrderRepository;
+import tacos.data.TacoRepository;
 import tacos.web.OrderController;
+import tacos.web.OrderProps;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -34,18 +39,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(OrderController.class)
+@EnableConfigurationProperties(value = OrderProps.class)
 public class OrderControllerTest {
 
     @Autowired
     private WebApplicationContext context;
+    @Autowired
+    private OrderProps orderProps;
 
     private MockMvc mockMvc;
     private UserDetailsService userDetailsService;
     private User testUser;
     private Order orderWithoutTacos;
+    private List<Order> lastOrders=new ArrayList<>();
 
     @MockBean
     private OrderRepository orderRepo;
+    @MockBean
+    private TacoRepository tacoRepo;
     @MockBean
     private IngredientRepository ingredientRepo;
 
@@ -75,8 +86,40 @@ public class OrderControllerTest {
         orderWithoutTacos.setCity(testUser.getCity());
         orderWithoutTacos.setState(testUser.getState());
         orderWithoutTacos.setZip(testUser.getZip());
+
+
+        for (long l = 0L; l < orderProps.getPageSize()+5; l++) {
+            lastOrders.add(createNewOrder(l));
+        }
+
+        when(orderRepo.findByUserOrderByPlacedAtDesc(testUser, PageRequest.of(0, orderProps.getPageSize())))
+                .thenReturn(lastOrders.subList(0, orderProps.getPageSize()));
+
+        when(tacoRepo.save(any(Taco.class))).thenReturn(design);
     }
 
+    private Order createNewOrder(long id){
+        Taco taco1=new Taco();
+        taco1.setName("TestTaco"+id);
+        taco1.setIngredients(Arrays.asList(
+                new Ingredient("FLTO", "Flour Tortilla", Ingredient.Type.WRAP),
+                new Ingredient("GRBF", "Ground Beef", Ingredient.Type.PROTEIN),
+                new Ingredient("CHED", "Cheddar", Ingredient.Type.CHEESE)
+        ));
+        taco1.setCreatedAt(new Date());
+        taco1.setId(1L);
+        Order newOrder=new Order();
+        newOrder.setCustomerName(testUser.getFullname());
+        newOrder.setStreet(testUser.getStreet());
+        newOrder.setCity(testUser.getCity());
+        newOrder.setState(testUser.getState());
+        newOrder.setZip(testUser.getZip());
+        newOrder.addDesign(taco1);
+        newOrder.setUser(testUser);
+        orderRepo.save(newOrder);
+
+        return newOrder;
+    }
 
     @Test
     public void openOrderForm() throws Exception{
@@ -107,6 +150,13 @@ public class OrderControllerTest {
                 .content(createTestContent("34567"))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(content().string(containsString("Not a valid credit card number")));
+    }
+
+    @Test
+    public void getLastOrders()throws Exception{
+        mockMvc.perform(get("/orders/lastOrders").with(user(testUser)))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("orders", hasSize(orderProps.getPageSize())));
     }
 
     private String createTestContent(){
