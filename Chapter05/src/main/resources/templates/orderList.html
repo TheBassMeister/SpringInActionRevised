@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Taco Cloud</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+</head>
+<body>
+<div class="menuHeader">
+    <a class="newDesign" th:href="@{/design}" id="another">Design another taco</a><br/>
+    <form method="POST" th:action="@{/logout}" class="logoutForm">
+        <input type="submit" value="Logout"/>
+    </form>
+</div>
+
+<h1>Your Order Summary</h1>
+<img th:src="@{/images/TacoCloud.png}"/>
+<div th:if="${orders.size eq 0}">You haven't designed any Tacos yet :( Click on "Design another taco" to create your first one</div>
+
+<table th:each="order: ${orders}" class="ordersTable">
+    <caption th:text="'Your Order placed at '+${#dates.format(order.placedAt, 'dd-MM-yyyy HH:mm')}">OrderNr</caption>
+    <tr>
+        <th width="25%">Taco Name</th>
+        <th width="25%">Created At</th>
+        <th>Ingredients</th>
+    </tr>
+
+<tr th:each="taco : ${order.tacos}">
+    <td th:text="${taco.name}">Taco Name</td>
+    <td th:text="${#dates.format(taco.createdAt, 'dd-MM-yyyy HH:mm')}">Created At</td>
+    <td>
+    <span th:each="ingredient, iterStat : ${taco.ingredients}" th:text="!${iterStat.last} ? ${ingredient.name} + ',': ${ingredient.name}">Ingredient Name </span>
+    </td>
+</tr>
+</table>
+</body>
+</html>
+<!--[Taco(id=1, createdAt=2021-01-12 20:00:33.33, name=aaaaa, ingredients=[Ingredient(id=FLTO, name=Flour Tortilla, type=WRAP), Ingredient(id=TMTO, name=Diced Tomatoes, type=VEGGIES)])]-->
