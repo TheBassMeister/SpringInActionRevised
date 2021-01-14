@@ -7,11 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
-import tacos.Ingredient;
+import tacos.*;
 import tacos.Ingredient.Type;
-import tacos.Order;
-import tacos.Taco;
-import tacos.User;
 import tacos.data.IngredientRepository;
 import tacos.data.TacoRepository;
 
@@ -29,7 +26,6 @@ public class DesignTacoController {
     private IngredientRepository ingredientRepository;
     private TacoRepository tacoRepository;
     private User currentUser;
-    private boolean noTacos=true;
 
     @Autowired
     public DesignTacoController(IngredientRepository ingredientRepository, TacoRepository tacoRepository){
@@ -64,23 +60,23 @@ public class DesignTacoController {
 
     @GetMapping
     public String showDesignForm(Model model, @AuthenticationPrincipal User user) {
-        model.addAttribute("design", new Taco());
+        model.addAttribute(TacoConstants.DESIGN, new Taco());
         currentUser=user;
         model.addAttribute("user", user());
         model.addAttribute("noTacos", true);
-        return "design";
+        return TacoConstants.DESIGN;
     }
 
     @PostMapping(params="action=addTaco")
     public String addToOrder(Model model, @ModelAttribute("design") @Valid Taco design, Errors errors, @ModelAttribute Order order) {
         if(errors.hasErrors()){
-            return "design";
+            return TacoConstants.DESIGN;
         }
         log.info("Processing design: " + design);
         Taco savedTaco=tacoRepository.save(design);
         order.addDesign(savedTaco);
         model.addAttribute("noTacos", false);
-        return "design";
+        return TacoConstants.DESIGN;
     }
 
     @PostMapping(params="action=orderTaco")

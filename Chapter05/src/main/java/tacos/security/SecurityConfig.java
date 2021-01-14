@@ -51,42 +51,4 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers("/h2-console/**");
     }
 
-    //In Memory User Store
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.inMemoryAuthentication()
-//                .withUser("BuzzLightYear").password("{noop}infinity").authorities("ROLE_USER").and()
-//                .withUser("Woody").password("{noop}bullseye").authorities("ROLE_USER");
-//    }
-
-    //From a Database
-//    @Autowired
-//    DataSource dataSource;
-//
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.jdbcAuthentication().dataSource(dataSource)
-//            .usersByUsernameQuery(
-//                    "select username, password, enabled from Users where username=?")
-//            .authoritiesByUsernameQuery(
-//                    "select username, authority from UserAuthorities where username=?")
-//            .passwordEncoder(NoOpPasswordEncoder.getInstance());
-//    }
-    //LDAP configuration
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception{
-//            auth
-//                    .ldapAuthentication()
-//                    .userSearchBase("ou=people")
-//                    .userSearchFilter("(uid={0})")
-//                    .groupSearchBase("ou=groups")
-//                    .groupSearchFilter("member={0}")
-//                    .passwordCompare()
-//                    .passwordEncoder(new BCryptPasswordEncoder())
-//                    .passwordAttribute("passcode")
-//                    .contextSource()
-//                    .root("dc=tacocloud,dc=com")
-//                    .ldif("classpath:users.ldif");
-//        }
-//    }
 }
