@@ -1,17 +1,23 @@
 package tacos.controllerTests;
 
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import tacos.Ingredient;
@@ -61,7 +67,7 @@ public class DesignTacoControllerTest {
 
     @Before
     public void setup() {
-        mockMvc= MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        mockMvc= MockMvcBuilders.webAppContextSetup(context).apply(SecurityMockMvcConfigurers.springSecurity()).build();
 
         ingredients = Arrays.asList(
                 new Ingredient("FLTO", "Flour Tortilla", Type.WRAP),
@@ -76,12 +82,12 @@ public class DesignTacoControllerTest {
                 new Ingredient("SRCR", "Sour Cream", Type.SAUCE)
         );
 
-        when(ingredientRepository.findAll())
+        Mockito.when(ingredientRepository.findAll())
                 .thenReturn(ingredients);
 
-        when(ingredientRepository.findById("FLTO")).thenReturn(Optional.of(new Ingredient("FLTO", "Flour Tortilla", Type.WRAP)));
-        when(ingredientRepository.findById("GRBF")).thenReturn(Optional.of(new Ingredient("GRBF", "Ground Beef", Type.PROTEIN)));
-        when(ingredientRepository.findById("CHED")).thenReturn(Optional.of(new Ingredient("CHED", "Cheddar", Type.CHEESE)));
+        Mockito.when(ingredientRepository.findById("FLTO")).thenReturn(Optional.of(new Ingredient("FLTO", "Flour Tortilla", Type.WRAP)));
+        Mockito.when(ingredientRepository.findById("GRBF")).thenReturn(Optional.of(new Ingredient("GRBF", "Ground Beef", Type.PROTEIN)));
+        Mockito.when(ingredientRepository.findById("CHED")).thenReturn(Optional.of(new Ingredient("CHED", "Cheddar", Type.CHEESE)));
 
         design = new Taco();
         design.setName("Test Taco");
@@ -95,76 +101,76 @@ public class DesignTacoControllerTest {
         testUser=new User("testuser", "testpass", "Test User", "123 Street", "Someville", "CO", "12345", "123-123-1234");
         userRepository.save(testUser);
 
-        when(userRepository.findByUsername("testuser")).thenReturn(testUser);
+        Mockito.when(userRepository.findByUsername("testuser")).thenReturn(testUser);
         userDetailsService= new InMemoryUserDetailsManager(Collections.singletonList(testUser));
     }
 
     @Test
     public void testShowDesignForm() throws Exception {
-        mockMvc.perform(get("/design").with(user(testUser)))
-                .andExpect(status().isOk())
-                .andExpect(view().name("design"))
-                .andExpect(model().attribute("wrap", ingredients.subList(0, 2)))
-                .andExpect(model().attribute("protein", ingredients.subList(2, 4)))
-                .andExpect(model().attribute("veggies", ingredients.subList(4, 6)))
-                .andExpect(model().attribute("cheese", ingredients.subList(6, 8)))
-                .andExpect(model().attribute("sauce", ingredients.subList(8, 10)))
-                .andExpect(content().string(containsString("<h2>Feelin' hungry, <span>Test User</span>?</h2>")));
+        mockMvc.perform(MockMvcRequestBuilders.get("/design").with(SecurityMockMvcRequestPostProcessors.user(testUser)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.view().name("design"))
+                .andExpect(MockMvcResultMatchers.model().attribute("wrap", ingredients.subList(0, 2)))
+                .andExpect(MockMvcResultMatchers.model().attribute("protein", ingredients.subList(2, 4)))
+                .andExpect(MockMvcResultMatchers.model().attribute("veggies", ingredients.subList(4, 6)))
+                .andExpect(MockMvcResultMatchers.model().attribute("cheese", ingredients.subList(6, 8)))
+                .andExpect(MockMvcResultMatchers.model().attribute("sauce", ingredients.subList(8, 10)))
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("<h2>Feelin' hungry, <span>Test User</span>?</h2>")));
     }
 
     @Test
     public void processDesign() throws Exception {
-        mockMvc.perform(post("/design").param("action","orderTaco").with(user(testUser))
+        mockMvc.perform(MockMvcRequestBuilders.post("/design").param("action","orderTaco").with(SecurityMockMvcRequestPostProcessors.user(testUser))
                 .content("name=Test+Taco&ingredients=FLTO,GRBF,CHED")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().stringValues("Location", "/orders/current"));
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.header().stringValues("Location", "/orders/current"));
     }
 
     @Test
     public void addNewTaco() throws Exception {
-        mockMvc.perform(post("/design").param("action","addTaco").with(user(testUser))
+        mockMvc.perform(MockMvcRequestBuilders.post("/design").param("action","addTaco").with(SecurityMockMvcRequestPostProcessors.user(testUser))
                 .content("name=Test+Taco&ingredients=FLTO,GRBF,CHED")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
     public void noIngredientSelected() throws Exception {
-        mockMvc.perform(post("/design").param("action","addTaco").with(user(testUser))
+        mockMvc.perform(MockMvcRequestBuilders.post("/design").param("action","addTaco").with(SecurityMockMvcRequestPostProcessors.user(testUser))
                 .content("name=Test+Taco")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(content().string(containsString("Please select at least one ingredient")));
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("Please select at least one ingredient")));
     }
 
     @Test
     public void noNameGiven() throws Exception {
-        mockMvc.perform(post("/design").param("action","addTaco").with(user(testUser))
+        mockMvc.perform(MockMvcRequestBuilders.post("/design").param("action","addTaco").with(SecurityMockMvcRequestPostProcessors.user(testUser))
                 .content("ingredients=FLTO,GRBF,CHED")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(content().string(containsString("must not be null")));
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("must not be null")));
     }
 
     @Test
     public void nameTooShort() throws Exception {
-        mockMvc.perform(post("/design").param("action","addTaco").with(user(testUser))
+        mockMvc.perform(MockMvcRequestBuilders.post("/design").param("action","addTaco").with(SecurityMockMvcRequestPostProcessors.user(testUser))
                 .content("name=Tes&ingredients=FLTO,GRBF,CHED")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(content().string(containsString("Name must be at least 5 characters long")));
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("Name must be at least 5 characters long")));
     }
 
     @Test
     public void notAuthorized() throws Exception{
-        mockMvc.perform(get("/design"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().stringValues("Location", "http://localhost/login"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/design"))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.header().stringValues("Location", "http://localhost/login"));
     }
 
     @Test
     public void logout() throws Exception{
-        mockMvc.perform(post("/logout").with(user(testUser)))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().stringValues("Location", "/"));
+        mockMvc.perform(MockMvcRequestBuilders.post("/logout").with(SecurityMockMvcRequestPostProcessors.user(testUser)))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.header().stringValues("Location", "/"));
 
     }
 

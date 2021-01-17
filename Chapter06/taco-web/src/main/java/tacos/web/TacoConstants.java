@@ -1,4 +1,4 @@
-package tacos;
+package tacos.web;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

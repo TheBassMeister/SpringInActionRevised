@@ -1,8 +1,11 @@
 package tacos.controllerTests;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -11,8 +14,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import tacos.Ingredient;
@@ -62,7 +69,7 @@ public class OrderControllerTest {
 
     @Before
     public void setup() {
-        mockMvc= MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+        mockMvc= MockMvcBuilders.webAppContextSetup(context).apply(SecurityMockMvcConfigurers.springSecurity()).build();
 
         Order order=new Order();
 
@@ -92,10 +99,10 @@ public class OrderControllerTest {
             lastOrders.add(createNewOrder(l));
         }
 
-        when(orderRepo.findByUserOrderByPlacedAtDesc(testUser, PageRequest.of(0, orderProps.getPageSize())))
+        Mockito.when(orderRepo.findByUserOrderByPlacedAtDesc(testUser, PageRequest.of(0, orderProps.getPageSize())))
                 .thenReturn(lastOrders.subList(0, orderProps.getPageSize()));
 
-        when(tacoRepo.save(any(Taco.class))).thenReturn(design);
+        Mockito.when(tacoRepo.save(ArgumentMatchers.any(Taco.class))).thenReturn(design);
     }
 
     private Order createNewOrder(long id){
@@ -123,44 +130,44 @@ public class OrderControllerTest {
 
     @Test
     public void openOrderForm() throws Exception{
-        mockMvc.perform(get("/orders/current").with(user(testUser)))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("order", orderWithoutTacos));
+        mockMvc.perform(MockMvcRequestBuilders.get("/orders/current").with(SecurityMockMvcRequestPostProcessors.user(testUser)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.model().attribute("order", orderWithoutTacos));
     }
 
     @Test
     public void notAuthorized() throws Exception{
-        mockMvc.perform(get("/orders/current"))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().stringValues("Location", "http://localhost/login"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/orders/current"))
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.header().stringValues("Location", "http://localhost/login"));
     }
 
     @Test
     public void processOrder() throws Exception {
-        mockMvc.perform(post("/orders").with(user(testUser))
+        mockMvc.perform(MockMvcRequestBuilders.post("/orders").with(SecurityMockMvcRequestPostProcessors.user(testUser))
                 .content(createTestContent())
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().stringValues("Location", "/orderCompleted"));
+                .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
+                .andExpect(MockMvcResultMatchers.header().stringValues("Location", "/orderCompleted"));
     }
 
     @Test
     public void wrongCreditCardNumber() throws Exception {
-        mockMvc.perform(post("/orders").with(user(testUser))
+        mockMvc.perform(MockMvcRequestBuilders.post("/orders").with(SecurityMockMvcRequestPostProcessors.user(testUser))
                 .content(createTestContent("34567"))
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(content().string(containsString("Not a valid credit card number")));
+                .andExpect(MockMvcResultMatchers.content().string(Matchers.containsString("Not a valid credit card number")));
     }
 
     @Test
     public void getLastOrders()throws Exception{
-        mockMvc.perform(get("/orders/lastOrders").with(user(testUser)))
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("orders", hasSize(orderProps.getPageSize())));
+        mockMvc.perform(MockMvcRequestBuilders.get("/orders/lastOrders").with(SecurityMockMvcRequestPostProcessors.user(testUser)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.model().attribute("orders", hasSize(orderProps.getPageSize())));
     }
 
     private String createTestContent(){
-        var testCreditCardNumber="378618187748325"; //Not a real Credit Card Number
+        String testCreditCardNumber="378618187748325"; //Not a real Credit Card Number
         return createTestContent(testCreditCardNumber);
     }
 
