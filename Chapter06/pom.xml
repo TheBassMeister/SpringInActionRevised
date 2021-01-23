@@ -29,7 +29,7 @@
 		<module>taco-domain</module>
 		<module>taco-security</module>
 		<module>taco-web</module>
-<!--		<module>tacocloud-ui</module>-->
+		<module>taco-ui</module>
 	</modules>
 
 </project>

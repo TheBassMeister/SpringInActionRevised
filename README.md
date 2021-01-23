@@ -26,4 +26,7 @@ Chapter 4 Update 2: Finally solved the AuthenticationPrincipal issue by configur
 Chapter 5 Spring properties: Added a new page to see the last orders, that use the new property taco.orders.pageSize property. Added test for that. Also added new functionality to actually add multiple tacos to same order. UX Design
 can be improved, but this is not an app about learning fronted, but about Spring.
 
-Chapter 6: Spring Rest coming soon
+Chapter 6: Spring Rest application. That was a bit of work to split up the project into separate components. But it works. Unfortunately using REST doesn't work so well with the old UI, so it had to be redone to Angular. 
+This also breaks the unit tests, as they were testing the old ui. The Angular code is just a copy from the original author, as I will need to work on my Angular knowledge. As I do not want to get sidetracked from learning Spring I will postpone it.
+
+Chapter 7: Will be about consuming the REST Api, quite important I would say.

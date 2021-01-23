@@ -38,16 +38,16 @@
             <artifactId>tacocloud-security</artifactId>
             <version>${tacocloud.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>sia</groupId>-->
-<!--            <artifactId>tacocloud-api</artifactId>-->
-<!--            <version>${tacocloud.version}</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>sia</groupId>-->
-<!--            <artifactId>tacocloud-ui</artifactId>-->
-<!--            <version>${tacocloud.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>sia</groupId>
+            <artifactId>tacocloud-api</artifactId>
+            <version>${tacocloud.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>sia</groupId>
+            <artifactId>tacocloud-ui</artifactId>
+            <version>${tacocloud.version}</version>
+        </dependency>
 
         <!-- Run against embedded H2 database by default -->
         <dependency>
