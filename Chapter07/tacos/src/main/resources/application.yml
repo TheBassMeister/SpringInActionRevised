@@ -1,0 +1,14 @@
+taco:
+  orders:
+    pageSize: 10
+
+spring:
+  thymeleaf:
+    cache: false
+  datasource:
+    url: jdbc:h2:mem:default
+  data:
+    rest:
+      base-path: /api
+
+
