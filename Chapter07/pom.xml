@@ -30,6 +30,7 @@
 		<module>taco-security</module>
 		<module>taco-web</module>
 		<module>taco-ui</module>
+		<module>taco-restclient</module>
 	</modules>
 
 </project>

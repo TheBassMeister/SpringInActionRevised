@@ -30,7 +30,7 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
-@RequestMapping(path = "/design",produces = "application/json")
+@RequestMapping(path = "/design",produces = "application/hal+json")
 @CrossOrigin(origins = "*")
 public class DesignTacoController {
     private TacoRepository tacoRepo;
@@ -43,24 +43,10 @@ public class DesignTacoController {
     }
 
     @GetMapping("/recent")
-    public Iterable<Taco> recentTacos() {                 //<3>
-        PageRequest page = PageRequest.of(
-                0, 12, Sort.by("createdAt").descending());
+    public Iterable<Taco> recentTacos() {
+        PageRequest page = PageRequest.of(0, 2, Sort.by("createdAt").descending());
         return tacoRepo.findAll(page).getContent();
     }
-
-      //Doesn't work well with Angular. Would need to investigate how to use HATEOAS with Angular
-//    @GetMapping("/recent")
-//    public Resources<TacoResource> recentTacos() {
-//        PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
-//        List<Taco> tacos = tacoRepo.findAll(page).getContent();
-//        List<TacoResource> tacoResources = new TacoResourceAssembler().toResources(tacos);
-//        Resources<TacoResource> recentResources = new Resources<TacoResource>(tacoResources);
-//        recentResources.add(linkTo(methodOn(DesignTacoController.class).recentTacos())
-//                .withRel("recents"));
-//
-//        return recentResources;
-//    }
 
     @PostMapping(consumes = "application/json")
     @ResponseStatus(HttpStatus.CREATED)

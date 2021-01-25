@@ -14,9 +14,9 @@ public class IngredientResourceAssembler extends ResourceAssemblerSupport<Ingred
     public IngredientResource toResource(Ingredient ingredient) {
         return createResourceWithId(ingredient.getId(), ingredient);
     }
+
     @Override
-    protected IngredientResource instantiateResource(
-            Ingredient ingredient) {
+    protected IngredientResource instantiateResource(Ingredient ingredient) {
         return new IngredientResource(ingredient);
     }
 
